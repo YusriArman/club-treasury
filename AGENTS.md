@@ -33,10 +33,35 @@ Several AI assistants work on this repo, so these rules define the style, not th
 - Real receipts, PDFs and SoAs go in storage/app/private, which is never committed.
 - Never store NRIC/passport numbers or personal bank account numbers.
 
+## Migrations
+- Never edit a migration that has been committed. Change the schema with a new migration.
+- An uncommitted migration that already ran locally: `php artisan migrate:rollback`, edit, then `php artisan migrate` again. Editing alone does nothing, because `migrate` skips migrations already recorded as run.
+- Money columns are `bigInteger` (signed where direction matters) and end in `_sen`.
+- No stored balance columns. Balances are always `SUM(amount_sen)` over movements.
+
+## Milestone 1 build order
+Build one table at a time, each with its model, and let the treasurer run every step:
+1. `accounts`: name, type (`virtual_account`, `operational_fund`, `petty_cash`, `cash_advance`), is_active.
+2. `movements`: account_id (foreign key), occurred_on date, signed amount_sen, description, reference, reverses_movement_id for corrections.
+3. `people` and `categories`.
+4. `expenses`: amount_sen, category, payer (person or account), event optional, evidence path.
+5. `claims` (claimed_amount_sen, approved_amount_sen, status) and `claim_payments` (each linked to one movement).
+6. Money helper (string RM to sen and back), then action classes in app/Actions.
+7. Forms and a dashboard showing bank balance and claims due.
+8. The milestone 1 acceptance test from docs/PLAN.md, plus over-repayment and no-double-count tests.
+
 ## Working with the treasurer
 - The treasurer is learning PHP and SQL. Explain changes, give commands for them to run, and leave one small change for them to implement in each stage.
+- The treasurer runs commands and edits files themselves. Give one command per code block, explain what it does and what output to expect, then wait for them to report back. Only run or edit things yourself when asked.
+- Show the SQL behind each Laravel step (for example `DESCRIBE accounts`), because explaining the database is the point of the project.
+- Mark placeholders clearly, such as `<YOUR-GITHUB-NOREPLY-EMAIL>`, so they are not typed in word for word.
 - Commits carry only the treasurer's authorship: no AI co-author or attribution lines.
 
+## Local environment
+- macOS with zsh. An unquoted `!` in a command triggers history expansion ("event not found"); quote it or avoid it.
+- MySQL CLI: use `mysql -u root treasury -E -e "..."` for vertical output; this MySQL version rejects `\G` inside `-e`.
+- Local MySQL root has no password. Fine for fictional data; secure it before any real data.
+
 ## Every session
-- Start: read this file, the latest docs/progress.md entry and docs/PLAN.md, then run the tests.
+- Start: read this file, the latest docs/progress.md entry and docs/PLAN.md, then run the tests. The latest progress entry says exactly where to resume.
 - End: tests, PHPStan and Pint pass, a commit is made, and docs/progress.md has a new entry (what changed, what's next, open decisions, which assistant helped).

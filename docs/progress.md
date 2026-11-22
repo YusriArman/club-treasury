@@ -15,3 +15,10 @@
 2. Commit: `git add .` then `git commit -m "Add accounts table and model"`.
 3. Next table: `movements` (step 2 of the milestone 1 build order in AGENTS.md). Explain foreign keys, signed `amount_sen` and why posted movements are never edited.
 **Open decisions:** none new.
+
+## 2026-11-23 · Milestone 1 movements table
+**Assistant:** Codex
+**Changed:** Added the `Movement` model and migrated the `movements` table in `treasury`. Verified with `SHOW CREATE TABLE movements` that `amount_sen` is signed, `account_id` references `accounts.id`, and the optional `reverses_movement_id` references `movements.id`.
+**Checks:** PHPUnit passed (2 tests, 2 assertions). PHPStan and Pint passed.
+**Next:** Build the `people` table and its `Person` model, then move on to `categories`.
+**Open decisions:** None.
